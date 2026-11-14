@@ -439,7 +439,7 @@ letter-spacing: 1px;
     border-radius: 5px;
 }
 .boxItems .item img,.boxOffers .item img{
-    height: 90%;
+    height: 60%;
     border-radius: 10px;
 }
 .boxItems .item .info,.boxOffers .item .info{
