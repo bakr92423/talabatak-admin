@@ -33,6 +33,8 @@ const UpdateStore = () => {
       }
 
 
+
+
       const getData=async()=>{
           
                   try{
@@ -76,7 +78,7 @@ const UpdateStore = () => {
              getData()
 
           },[])
-          useEffect((id)=>{
+          useEffect(()=>{
              getStoreData()
             },[id])
 

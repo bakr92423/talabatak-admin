@@ -29,7 +29,7 @@ const UpdateTypeStore = () => {
       const getData=async()=>{
 
         try{
-      const getData=await axios.get(`${SITE}/api/typeStore/$`,{headers: { "Content-Type": "application/json"} })  
+      const getData=await axios.get(`${SITE}/api/typeStore/${id}`,{headers: { "Content-Type": "application/json"} })  
       const resData=getData.data.data
       
       setName(resData.name)
