@@ -21,6 +21,11 @@ const AddItem = () => {
     const URLSITE='https://talabatak-ebon.vercel.app'
     const fileInputRef=useRef(null)
     const storeId=JSON.parse(localStorage.getItem("storeId"))
+
+    // الجديد: الأحجام
+    const [hasVariants,setHasVariants]=useState(false)
+    const [variants,setVariants]=useState([{ size: "", price: "" }])
+
     const handleFileChange=(e)=>{
          const file=e.target.files[0]
               if(file){
@@ -41,86 +46,115 @@ const AddItem = () => {
     }
   }
 
-
     const getCategorys=async()=>{
-              
      try{
                 const ownerId = getUserIdFromToken()
                  if (!ownerId) return
                     const getData=await axios.get(`${URLSITE}/api/category/owner/${ownerId}`,{headers: { "Content-Type": "application/json"} })  
                     const resData=getData.data.data
-                    
                     setCategores(resData)
-              
                       }catch(error){
                           alert("خطأ في جلب البيانات")
-              
                       }
-              
         }
-
 
         useEffect(()=>{
             getCategorys()
-
         },[])
 
     const addItem=async()=>{
-                
         try{
-                
          const formData= new FormData()
          formData.append("image",image)
-        formData.append("name",name)
+         formData.append("name",name)
          const sendImage= await axios.post(`${URLSITE}/api/upload`,formData,{ headers: { "Content-Type": "multipart/form-data" } })
          const imageUrl=sendImage.data.imageUrl
              console.log(imageUrl);
                 
+             // تجهيز الـ variants قبل الارسال
+             let finalVariants = []
+             if(hasVariants){
+                finalVariants = variants.filter(v => v.size && v.price).map(v => ({
+                    size: v.size,
+                    price: Number(v.price),
+                    priceAfterDiscount: v.priceAfterDiscount ? Number(v.priceAfterDiscount) : undefined
+                }))
+                if(finalVariants.length === 0){
+                    return alert("اكتب حجم واحد على الأقل")
+                }
+             }
+
              const data={
               name,
-             description,
-             image:imageUrl,
-             price,
-             priceAfterDiscount,
-             store:storeId,
-             isActive,
-             category,
-          
+              description,
+              image:imageUrl,
+              price: hasVariants ? undefined : price,
+              priceAfterDiscount: hasVariants ? undefined : priceAfterDiscount,
+              variants: finalVariants,
+              store:storeId,
+              isActive,
+              category,
              }
          const sendData= await axios.post(`${URLSITE}/api/product`,data,{headers: { "Content-Type": "application/json"} })
           console.log(sendData,"sendData");
-                          
-                
              if(sendData.data.errors){
               return alert(sendData.data.errors[0].msg)
              }
-                           console.log(sendData.data.data);
-                           
                            alert(sendData.data.msg)
-          
-                            setDescription("")
-                            setName("")
+                           setDescription("")
+                           setName("")
                            setImage(null)
                            setPreview(null)
                            setPrice("")
                            setPriceAfterDiscount("")
                            setStore("")
                            setCategory("")
-
-                
+                           setHasVariants(false)
+                           setVariants([{ size: "", price: "" }])
                        }catch(error){
                         alert("فشلت عملية الاضافة")
                        }
-                
-                
             }
 
-    
   return (
     <div className='AddItem col-12 d-flex justify-content-between ' >
         <div className='col-8 col-md-4 said col-lg-2' ><SaidAdmin/></div>
         <div className='  col-12 col-md-8 col-lg-10  ' >
-            <div className='col-12 d-flex justify-content-center align-items-center mt-5 ' ><ItemForm
+            <div className='col-12 d-flex flex-column justify-content-center align-items-center mt-5 ' >
+
+            {/* زرار الأحجام */}
+            <div className='col-10 col-md-8 bg-white p-3 rounded shadow-sm mb-3' dir='rtl'>
+                <label className='d-flex align-items-center gap-2 fw-bold' style={{cursor:'pointer'}}>
+                    <input type="checkbox" checked={hasVariants} onChange={(e)=>setHasVariants(e.target.checked)} />
+                    المنتج ليه أكتر من حجم؟ زي وسط وكبير
+                </label>
+
+                {hasVariants && (
+                    <div className='mt-3'>
+                        {variants.map((v, index)=>(
+                            <div key={index} className='d-flex gap-2 mb-2'>
+                                <input className='form-control' placeholder='الحجم - مثال: وسط' value={v.size} onChange={(e)=>{
+                                    const copy=[...variants]
+                                    copy[index].size=e.target.value
+                                    setVariants(copy)
+                                }} />
+                                <input className='form-control' type='number' placeholder='السعر' value={v.price} onChange={(e)=>{
+                                    const copy=[...variants]
+                                    copy[index].price=e.target.value
+                                    setVariants(copy)
+                                }} />
+                                <button className='btn btn-danger' onClick={()=>{
+                                    if(variants.length===1) return
+                                    setVariants(variants.filter((_,i)=>i!==index))
+                                }}>x</button>
+                            </div>
+                        ))}
+                        <button className='btn btn-outline-success btn-sm' onClick={()=>setVariants([...variants, {size:"", price:""}])}>+ أضف حجم</button>
+                    </div>
+                )}
+            </div>
+
+            <ItemForm
             icon={icon}
             title={title}
             btnTitle={btnTitle}
@@ -147,13 +181,10 @@ const AddItem = () => {
             fileInputRef={fileInputRef}
             handleFileChange={handleFileChange}
             apply={addItem}
-
-
-            /></div>
-
+             hasVariants={hasVariants} 
+            />
+            </div>
         </div>
-
-      
     </div>
   )
 }
