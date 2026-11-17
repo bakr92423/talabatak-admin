@@ -136,7 +136,8 @@ const OrdersPage = () => {
                     <p>العنوان: {openedOrder.address}</p>
                     <p>التليفون: {openedOrder.phone}</p>
                     <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                    <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.product?.name} x ${i.quantity}`).join(' - ')}</p>
+                    {/* اتصلحت: نعرض الاسم المحفوظ في الأوردر + الحجم */}
+                    <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} x ${i.quantity} - ${i.price}ج`).join(' | ')}</p>
                     <div className='d-flex gap-2'>
                       <button onClick={() => setOpenedOrder(null)} className='btn btn-secondary flex-fill'>خروج من الطلب</button>
                     </div>
@@ -152,3 +153,4 @@ const OrdersPage = () => {
 }
 
 export default OrdersPage
+

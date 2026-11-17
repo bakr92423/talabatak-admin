@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import axios from 'axios'
 import Said from '../../../Components/Layout/Said'
 
-
 const DeliveryHomePage = () => {
   const [orders, setOrders] = useState([])
   const [openedOrder, setOpenedOrder] = useState(null)
@@ -26,6 +25,11 @@ const DeliveryHomePage = () => {
     } catch { return null }
   }
   const pilotId = getPilotId()
+
+  // دالة واحدة لعرض الصنف بالحجم - عشان الكارت والتفاصيل والواتساب
+  const formatItems = (items) => {
+    return items?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} × ${i.quantity} - ${i.price}ج`).join(' | ')
+  }
 
   const playSound = () => {
     if (!soundOnRef.current) return
@@ -121,7 +125,7 @@ const DeliveryHomePage = () => {
       const phone = (openedOrder.store?.phone || openedOrder.storePhone || '')
         .toString().replace('+', '').replaceAll(' ', '').replaceAll('-', '')
       if (phone) {
-        const text = encodeURIComponent(`🔔 تم استلام الطلب\nالمبلغ: ${openedOrder.totalOrder} ج\nالعنوان: ${openedOrder.address}\nانا في الطريق للمطعم دلوقتي 🛵`)
+        const text = encodeURIComponent(`🔔 تم استلام الطلب\nالمبلغ: ${openedOrder.totalOrder} ج\nالعنوان: ${openedOrder.address}\nالأصناف: ${formatItems(openedOrder.orderItems)}\nانا في الطريق للمطعم دلوقتي 🛵`)
         window.open(`https://wa.me/${phone}?text=${text}`, '_blank')
       }
       setOpenedOrder(null)
@@ -137,7 +141,6 @@ const DeliveryHomePage = () => {
       getOrders()
     } catch (e) { console.log(e); alert('حصل مشكلة في الغاء الطلب') }
   }
-
 
   return (
     <div className='d-flex delivery-page'>
@@ -173,6 +176,7 @@ const DeliveryHomePage = () => {
                   <h5>{o.store?.name || 'مطعم'}</h5>
                   <p><i className='fa-solid fa-location-pin ' ></i> {o.address}</p>
                   <p><i className='fa-solid fa-phone ' ></i> {o.phone}</p>
+                  <p className='small text-muted'>الأصناف: {formatItems(o.orderItems)}</p>
                   <p className='fw-bold text-success'>إجمالي المبلغ: {o.totalOrder} جنيه</p>
                   <button className='btn btn-open w-100 mt-auto' onClick={() => openOrder(o)}>فتح الطلب</button>
                 </div>
@@ -191,7 +195,7 @@ const DeliveryHomePage = () => {
                 <p>العنوان: {openedOrder.address}</p>
                 <p>التليفون: {openedOrder.phone}</p>
                 <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.product.name}`).join(' - ')}</p>
+                <p>الأصناف: {formatItems(openedOrder.orderItems)}</p>
                 <div className='d-flex gap-2'>
                   <button className='btn btn-success flex-fill' onClick={acceptOrder}>استلام الطلب ✅</button>
                   <button className='btn btn-dinger flex-fill' onClick={cancelledOrder}>الغاء الطلب ✅</button>

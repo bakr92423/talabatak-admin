@@ -19,7 +19,11 @@ const OrderCardForm = ({ order, onOpen }) => {
 
         <div className='orderItems d-flex justify-content-center align-items-center col-5 flex-wrap'>
           {order.orderItems?.map((item, index) => (
-            <p className='mx-1' key={index}> {item.product?.name || item.name} {item.quantity}x</p>
+            <p className='mx-1' key={index}>
+              {item.name || item.product?.name}
+              {item.size ? ` (${item.size})` : ''}
+              {' '}{item.quantity}x - {item.price}ج
+            </p>
           ))}
         </div>
 

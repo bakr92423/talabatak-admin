@@ -1,10 +1,8 @@
 import React from 'react'
 
-
 import { useEffect, useState } from "react"
 import axios from "axios"
 import Said from '../../../Components/Layout/Said'
-
 
 const PreviousOrdersPage = () => {
   const [orders, setOrders] = useState([])
@@ -23,6 +21,11 @@ const PreviousOrdersPage = () => {
   }
   const pilotId = getPilotId()
   console.log(pilotId,"pilod");
+
+  // دالة واحدة لعرض الصنف بالحجم
+  const formatItems = (items) => {
+    return items?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} × ${i.quantity} - ${i.price}ج`).join(' | ')
+  }
 
   useEffect(() => {
     const getPrevious = async () => {
@@ -58,7 +61,7 @@ const PreviousOrdersPage = () => {
                   <h5 className='previous-store'>{o.store?.name || 'مطعم'}</h5>
                   <p className='previous-text'><i className='fa-solid fa-location-pin ' ></i> {o.address}</p>
                   <p className='previous-text'><i className='fa-solid fa-phone ' ></i> {o.phone}</p>
-                  <p className='previous-text'>الأصناف: {o.orderItems?.map(i => `${i.product?.name} × ${i.quantity}`).join(' - ')}</p>
+                  <p className='previous-text'>الأصناف: {formatItems(o.orderItems)}</p>
                   <p className='previous-price'>إجمالي المبلغ: {o.totalOrder} جنيه</p>
                   <button className='btn previous-btn w-100 mt-auto' onClick={() => setOpenedOrder(o)}>فتح الطلب</button>
                 </div>
@@ -73,7 +76,7 @@ const PreviousOrdersPage = () => {
                 <p>العنوان: {openedOrder.address}</p>
                 <p>التليفون: {openedOrder.phone}</p>
                 <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.product?.name} × ${i.quantity}`).join(' - ')}</p>
+                <p>الأصناف: {formatItems(openedOrder.orderItems)}</p>
                 <button className='btn btn-secondary w-100' onClick={() => setOpenedOrder(null)}>إغلاق</button>
               </div>
             </div>

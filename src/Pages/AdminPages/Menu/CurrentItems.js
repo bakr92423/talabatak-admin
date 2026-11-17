@@ -24,7 +24,7 @@ const CurrentItems = () => {
   const getProducts=async()=>{
       
               try{
-                  let id = getUserIdFromToken()
+                 let id = getUserIdFromToken()
                  if (!id) return
 
                 if(keyword!==''){
@@ -58,7 +58,7 @@ const CurrentItems = () => {
                 
                         try{
                            const ownerId = getUserIdFromToken()
-                          if (!ownerId) return
+                         if (!ownerId) return
                       const getData=await axios.get(`${URLSITE}/api/category/owner/${ownerId}`,{headers: { "Content-Type": "application/json"} })  
                       const resData=getData.data.data
                       console.log(resData,"cat");
@@ -105,7 +105,6 @@ const CurrentItems = () => {
       getProducts()
     },[keyword])
 
-
   return (
     <div className=' CreateUser CurrentItems d-flex justify-content-between col-12 mt-4  ' >
                 <div className=' col-8 col-md-4 col-lg-2 said mt-1 ' ><SaidAdmin/></div>
@@ -128,21 +127,36 @@ const CurrentItems = () => {
                   <div className='  boxItems d-flex justify-content-center  col-md-11 col-lg-10  ' >
                    {products.map((item)=>{
                     return(
-                       <div className=' item my-2 mx-2 d-flex flex-column col-11 col-md-5 col-lg-3' >
+                       <div className=' item my-2 mx-2 d-flex flex-column col-11 col-md-5 col-lg-3' key={item._id} >
                         <img src={item.image} />
                         <span className={`px-3 p-1 fw-bold  text-xs d-flex justify-content-center align-items-center ${item.isActive?"bg-success text-light":"bg-danger text-light"} `} >{item.isActive?"متوفر":"غير متوفر"}</span>
                         <div className='info d-flex flex-column ' >
                           <h5 className='fw-bold mb-0 mt-1 py-0 mx-2 ' >{item.name}</h5>
-                           <div className=' d-flex d-flex justify-content-between my-0 py-0 mx-2 ' ><p className='fw-bold' >{item.category.name}</p><p className='fw-bold' >{item.price}ج.م</p></div>
-                           <div className=' d-flex d-flex justify-content-between my-1 py-0 mx-2 ' ><Link to={`/admin/updateItem/${item._id}`} className='px-3 py-1 fw-bold ' >تعديل</Link> <Link to={`/admin/deleteItem/${item._id}`}  className='px-3 py-1 fw-bold ' >حذف</Link> </div>
+                          <div className=' d-flex d-flex justify-content-between my-0 py-0 mx-2 ' ><p className='fw-bold' >{item.category?.name}</p>
+                          {/* السعر: لو فيه أحجام اعرض أقل سعر + الأحجام */}
+                          <p className='fw-bold' >{item.variants?.length > 0 ? `من ${Math.min(...item.variants.map(v=>Number(v.priceAfterDiscount || v.price)))} ج.م` : `${item.price}ج.م`}</p>
+                          </div>
+
+                          {/* الجديد: عرض الأحجام */}
+                          {item.variants?.length > 0 && (
+                            <div className='d-flex flex-wrap gap-1 mx-2 mb-2'>
+                              {item.variants.map((v,i)=>(
+                                <span key={i} className='badge bg-light text-dark border px-2 py-1' style={{fontSize:'12px'}}>
+                                  {v.size} : {v.priceAfterDiscount || v.price} ج.م
+                                  {v.discount > 0 && <span className='text-danger'> - خصم {v.discount}%</span>}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className=' d-flex d-flex justify-content-between my-1 py-0 mx-2 ' ><Link to={`/admin/updateItem/${item._id}`} className='px-3 py-1 fw-bold ' >تعديل</Link> <Link to={`/admin/deleteItem/${item._id}`}  className='px-3 py-1 fw-bold ' >حذف</Link> </div>
                         </div>
                         
-                        
+                       
 
                     </div>
                     )
                    })}
-
 
                   </div>
 
@@ -154,3 +168,4 @@ const CurrentItems = () => {
 }
 
 export default CurrentItems
+
