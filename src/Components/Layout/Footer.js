@@ -2,8 +2,8 @@ import React from 'react'
 
 const Footer = () => {
   return (
-    <div className="Footer text-center bg-dark" >
-      <p className='text-light' >Created By : Bakr Saber</p>
+    <div className="Footer text-center " >
+      <small className="d-flex justify-content-center py-1 " >Talabatk v1.0</small>
       
     </div>
   )
