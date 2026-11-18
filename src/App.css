@@ -424,7 +424,7 @@ letter-spacing: 1px;
     background-color: var(--main-color);
     border-radius: 15px;
     box-shadow: 0 0 7px 1px #00000054;
-    height: 330px;
+    height: 300px;
     position: relative;
 }
 .boxItems .item span{
@@ -439,7 +439,7 @@ letter-spacing: 1px;
     border-radius: 5px;
 }
 .boxItems .item img,.boxOffers .item img{
-    height: 60%;
+    height: 55%;
     border-radius: 10px;
 }
 .boxItems .item .info,.boxOffers .item .info{
