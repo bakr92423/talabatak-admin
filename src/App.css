@@ -425,7 +425,7 @@ letter-spacing: 1px;
     border-radius: 15px;
     box-shadow: 0 0 7px 1px #00000054;
     height: auto !important;
-    min-height: 360px;
+    min-height: 300px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -446,7 +446,7 @@ letter-spacing: 1px;
     border-radius: 5px;
 }
 .boxItems .item img, .boxOffers .item img {
-    height: 55%;
+    height:180px;
     border-radius: 10px;
 }
 .boxItems .item .info, .boxOffers .item .info {
