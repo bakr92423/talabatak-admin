@@ -126,7 +126,7 @@ const DeliveryHomePage = () => {
         .toString().replace('+', '').replaceAll(' ', '').replaceAll('-', '')
       if (phone) {
         const text = encodeURIComponent(`🔔 تم استلام الطلب\nالمبلغ: ${openedOrder.totalOrder} ج\nالعنوان: ${openedOrder.address}\nالأصناف: ${formatItems(openedOrder.orderItems)}\nانا في الطريق للمطعم دلوقتي 🛵`)
-        window.open(`https://wa.me/${phone}?text=${text}`, '_blank')
+
       }
       setOpenedOrder(null)
       getOrders()

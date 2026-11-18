@@ -132,16 +132,16 @@ const CurrentItems = () => {
                         <span className={`px-3 p-1 fw-bold  text-xs d-flex justify-content-center align-items-center ${item.isActive?"bg-success text-light":"bg-danger text-light"} `} >{item.isActive?"متوفر":"غير متوفر"}</span>
                         <div className='info d-flex flex-column ' >
                           <h5 className='fw-bold mb-0 mt-1 py-0 mx-2 ' >{item.name}</h5>
-                          <div className=' d-flex d-flex justify-content-between my-0 py-0 mx-2 ' ><p className='fw-bold' >{item.category?.name}</p>
+                          <div className=' d-flex d-flex justify-content-between my-1 py-0 mx-2 ' ><p className='fw-bold' >{item.category?.name}</p>
                           {/* السعر: لو فيه أحجام اعرض أقل سعر + الأحجام */}
                           <p className='fw-bold' >{item.variants?.length > 0 ? `من ${Math.min(...item.variants.map(v=>Number(v.priceAfterDiscount || v.price)))} ج.م` : `${item.price}ج.م`}</p>
                           </div>
 
                           {/* الجديد: عرض الأحجام */}
                           {item.variants?.length > 0 && (
-                            <div className='d-flex flex-wrap gap-1 mx-2 mb-2'>
+                            <div className='d-flex justify-content-center py-1  gap-1 mx-2 mb-2'>
                               {item.variants.map((v,i)=>(
-                                <span key={i} className='badge bg-light text-dark border px-2 py-1' style={{fontSize:'12px'}}>
+                                <span key={i} className='badge bg-light text-dark border px-2 py-1 sizeSpan ' style={{fontSize:'12px'}}>
                                   {v.size} : {v.priceAfterDiscount || v.price} ج.م
                                   {v.discount > 0 && <span className='text-danger'> - خصم {v.discount}%</span>}
                                 </span>

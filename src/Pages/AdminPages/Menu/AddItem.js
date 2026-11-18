@@ -119,7 +119,7 @@ const AddItem = () => {
   return (
     <div className='AddItem col-12 d-flex justify-content-between ' >
         <div className='col-8 col-md-4 said col-lg-2' ><SaidAdmin/></div>
-        <div className='  col-12 col-md-8 col-lg-10  ' >
+        <div className='  col-12 col-md-8 col-lg-10 mt-2 ' >
             <div className='col-12 d-flex flex-column justify-content-center align-items-center mt-5 ' >
 
             {/* زرار الأحجام */}
