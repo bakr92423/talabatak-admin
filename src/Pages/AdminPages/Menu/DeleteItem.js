@@ -87,7 +87,7 @@ const DeleteItem = () => {
              try{
 
 
-              const sendData= await axios.delete(`${URLSITE}/api/store/${id}`,{headers: { "Content-Type": "application/json"} })
+              const sendData= await axios.delete(`${URLSITE}/api/product/${id}`,{headers: { "Content-Type": "application/json"} })
                 console.log(sendData,"sendData");
                 
       
