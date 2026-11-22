@@ -131,7 +131,7 @@ const Dashboard = () => {
 
     return (
         <div className='adminHome d-flex justify-content-between ' >
-            <div className=' col-8 col-md-4 col-lg-2 said mb-3 ' ><SaidAdmin /></div>
+            <div className=' col-10 col-md-4 col-lg-2 said mb-3 ' ><SaidAdmin /></div>
             <div className=' col-12 col-lg-10 mt-3' >
                 <div className='cards d-flex justify-content-center my-4 col-12 col-md-8 col-lg-12 mt-5 ' >
                     <div className='card col-5 col-md-3 col-lg-2 d-flex flex-column align-items-center my-1 mx-1  ' >

@@ -26,6 +26,39 @@ const AddItem = () => {
     const [hasVariants,setHasVariants]=useState(false)
     const [variants,setVariants]=useState([{ size: "", price: "" }])
 
+    // === الجديد: ضغط الصورة قبل الرفع - عشان كوتة Cloudinary الفري ===
+    // بيصغر أي صورة لـ 1200px كحد أقصى وبجودة 82%، من غير ما يبان فرق للزبون
+    const compressImage = (file) => {
+        return new Promise((resolve) => {
+            // لو مش صورة، رجعها زي ما هي
+            if (!file.type.startsWith('image/')) return resolve(file);
+
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const maxWidth = 1200;
+                let { width, height } = img;
+                // لو الصورة أصغر من 1200، سيبها زي ما هي
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(img.src);
+                    if (!blob) return resolve(file);
+                    const compressed = new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
+                    console.log(`قبل الضغط: ${(file.size / 1024 / 1024).toFixed(2)} MB - بعد الضغط: ${(compressed.size / 1024).toFixed(0)} KB`);
+                    resolve(compressed);
+                }, 'image/jpeg', 0.82);
+            };
+            img.onerror = () => resolve(file);
+        });
+    };
+
     const handleFileChange=(e)=>{
          const file=e.target.files[0]
               if(file){
@@ -64,8 +97,14 @@ const AddItem = () => {
 
     const addItem=async()=>{
         try{
+         if(!image) return alert("اختر صورة الأول");
+         if(!name) return alert("اكتب اسم الصنف");
+
+         // === ضغط الصورة هنا قبل ما تتبعت للباك إند ===
+         const compressedImage = await compressImage(image);
+
          const formData= new FormData()
-         formData.append("image",image)
+         formData.append("image",compressedImage)
          formData.append("name",name)
          const sendImage= await axios.post(`${URLSITE}/api/upload`,formData,{ headers: { "Content-Type": "multipart/form-data" } })
          const imageUrl=sendImage.data.imageUrl
@@ -111,7 +150,9 @@ const AddItem = () => {
                            setCategory("")
                            setHasVariants(false)
                            setVariants([{ size: "", price: "" }])
+                           if(fileInputRef.current) fileInputRef.current.value = ""
                        }catch(error){
+                        console.log(error);
                         alert("فشلت عملية الاضافة")
                        }
             }
