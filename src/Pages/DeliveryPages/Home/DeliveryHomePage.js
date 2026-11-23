@@ -2,6 +2,39 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import axios from 'axios'
 import Said from '../../../Components/Layout/Said'
 
+// ===== جدول الأصناف اللي ثبتنا عليه =====
+const OrderItemsTable = ({ items }) => (
+  <div dir="rtl" style={{ background: '#f2f2f2', borderRadius: '12px', overflow: 'hidden', width: '100%' }}>
+    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', tableLayout: 'fixed' }}>
+      <thead>
+        <tr style={{ background: '#eee', fontWeight: 'bold' }}>
+          <th style={{ padding: '8px 4px', borderLeft: '1px solid #ddd', width: '50%', wordBreak: 'break-word' }}>المنتج</th>
+          <th style={{ padding: '8px 4px', borderLeft: '1px solid #ddd', width: '25%' }}>الكمية</th>
+          <th style={{ padding: '8px 4px', width: '25%' }}>المجموع</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items?.map((item, index) => {
+          const name = item.name || item.product?.name
+          const size = item.size ? ` (${item.size})` : ''
+          const total = item.price * item.quantity
+          return (
+            <tr key={index} style={{ borderTop: '1px solid #ddd' }}>
+              <td style={{ padding: '8px 4px', fontWeight: 'bold', wordBreak: 'break-word' }}>{name}{size}</td>
+              <td style={{ padding: '8px 4px' }}>
+                <span dir="ltr" style={{ background: '#d9d9d9', padding: '3px 12px', borderRadius: '20px', display: 'inline-block', fontWeight: 'bold' }}>
+                  x {item.quantity}
+                </span>
+              </td>
+              <td dir="ltr" style={{ padding: '8px 4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{total} ج</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  </div>
+)
+
 const DeliveryHomePage = () => {
   const [orders, setOrders] = useState([])
   const [openedOrder, setOpenedOrder] = useState(null)
@@ -26,9 +59,9 @@ const DeliveryHomePage = () => {
   }
   const pilotId = getPilotId()
 
-  // دالة واحدة لعرض الصنف بالحجم - عشان الكارت والتفاصيل والواتساب
+  // دي للواتساب بس - نص نضيف من غير × عشان ميتقلبش
   const formatItems = (items) => {
-    return items?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} × ${i.quantity} - ${i.price}ج`).join(' | ')
+    return items?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} - الكمية: ${i.quantity} - المجموع: ${i.price * i.quantity}ج`).join('\n')
   }
 
   const playSound = () => {
@@ -61,7 +94,6 @@ const DeliveryHomePage = () => {
   const getOrders = useCallback(async () => {
     try {
       const res = await axios.get(`${URL}/api/order`)
-      
       const list = res.data.data || res.data.orders || res.data || []
       console.log(list,"list");
       const arr = Array.isArray(list) ? list : []
@@ -126,7 +158,6 @@ const DeliveryHomePage = () => {
         .toString().replace('+', '').replaceAll(' ', '').replaceAll('-', '')
       if (phone) {
         const text = encodeURIComponent(`🔔 تم استلام الطلب\nالمبلغ: ${openedOrder.totalOrder} ج\nالعنوان: ${openedOrder.address}\nالأصناف: ${formatItems(openedOrder.orderItems)}\nانا في الطريق للمطعم دلوقتي 🛵`)
-
       }
       setOpenedOrder(null)
       getOrders()
@@ -136,7 +167,6 @@ const DeliveryHomePage = () => {
     try {
       await axios.patch(`${URL}/api/order/${openedOrder._id}/status`, { pilotId,status:"cancelled" })
       alert('تم الغاء الأوردر  ✅')
-
       setOpenedOrder(null)
       getOrders()
     } catch (e) { console.log(e); alert('حصل مشكلة في الغاء الطلب') }
@@ -176,7 +206,8 @@ const DeliveryHomePage = () => {
                   <h5>{o.store?.name || 'مطعم'}</h5>
                   <p><i className='fa-solid fa-location-pin ' ></i> {o.address}</p>
                   <p><i className='fa-solid fa-phone ' ></i> {o.phone}</p>
-                  <p className='small text-muted'>الأصناف: {formatItems(o.orderItems)}</p>
+                  {/* ===== اتظبط: جدول بدل النص المقلوب ===== */}
+                  <div className='mb-2'><OrderItemsTable items={o.orderItems} /></div>
                   <p className='fw-bold text-success'>إجمالي المبلغ: {o.totalOrder} جنيه</p>
                   <button className='btn btn-open w-100 mt-auto' onClick={() => openOrder(o)}>فتح الطلب</button>
                 </div>
@@ -190,12 +221,12 @@ const DeliveryHomePage = () => {
                 <div className='d-flex  justify-content-between ' >
                   <h4>تفاصيل الطلب - {openedOrder.totalOrder} ج</h4>
                     <a href={`tel:${openedOrder.phone}`} className=' phone d-flex justify-content-center align-items-center ' ><i className='fa-solid fa-phone text-light fw-bold '></i></a>
-
                   </div>
                 <p>العنوان: {openedOrder.address}</p>
                 <p>التليفون: {openedOrder.phone}</p>
                 <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                <p>الأصناف: {formatItems(openedOrder.orderItems)}</p>
+                {/* ===== اتظبط: جدول في التفاصيل كمان ===== */}
+                <div className='mb-3'><OrderItemsTable items={openedOrder.orderItems} /></div>
                 <div className='d-flex gap-2'>
                   <button className='btn btn-success flex-fill' onClick={acceptOrder}>استلام الطلب ✅</button>
                   <button className='btn btn-dinger flex-fill' onClick={cancelledOrder}>الغاء الطلب ✅</button>
