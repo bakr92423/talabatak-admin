@@ -57,14 +57,11 @@ const Dashboard = () => {
         const ownerId = getUserIdFromToken()
         if (!ownerId) return
         try {
-            // params t: Date.now() دي اللي بتلغي مشكلة 304 والكاش
             const getData = await axios.get(`${URLSITE}/api/order/owner/${ownerId}`, {
                 params: { t: Date.now() },
                 headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
             })
             const all = getData.data.data || getData.data.orders || []
-
-            // فلتر: بتوع النهاردة + الدليفري عمل accepted بس
             const today = new Date().toDateString()
             const filtered = all.filter(o => {
                 const d = o.createdAt ? new Date(o.createdAt).toDateString() : ""
@@ -72,8 +69,6 @@ const Dashboard = () => {
                 const isAccepted = o.status === "accepted" || o.deliveryStatus === "accepted" || o.status === "acceptedByDelivery"
                 return isToday && isAccepted
             })
-
-            // كشف اوردر جديد زي الدليفري
             const newIds = filtered.map(o => o._id)
             const hasNew = newIds.some(id => !prevIds.current.includes(id))
             if (hasNew && prevIds.current.length > 0) {
@@ -82,12 +77,10 @@ const Dashboard = () => {
                 document.title = '🔔 طيار استلم طلب جديد!'
             }
             prevIds.current = newIds
-
             setOrders(all)
         } catch (e) { console.log(e) }
     }, [])
 
-    // هات عدد اصناف القايمة
     const getMenuCount = useCallback(async () => {
         const ownerId = getUserIdFromToken()
         if (!ownerId) return
@@ -110,7 +103,6 @@ const Dashboard = () => {
         return () => clearInterval(interval)
     }, [getOrders, getMenuCount])
 
-    // ==== الحسابات الديناميك ====
     const { todayRevenue, todayOrdersCount, todayOrders } = useMemo(() => {
         const today = new Date().toDateString()
         const filtered = orders.filter(o => {
@@ -151,7 +143,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* زرار الصوت زي الدليفري */}
                 <div className='d-flex justify-content-center my-2 gap-2'>
                     <button className={`btn ${soundOn ? 'btn-success' : 'btn-outline-secondary'}`} onClick={toggleSound}>
                         {soundOn ? '🔔 الصوت شغال' : '🔕 شغل صوت الطلبات الجديدة'}
@@ -176,13 +167,55 @@ const Dashboard = () => {
                                     <div className='card delivery-card p-4'>
                                         <div className='d-flex justify-content-between'>
                                             <h4>تفاصيل الطلب - {openedOrder.totalOrder} ج</h4>
-                                          
                                         </div>
                                         <p>العنوان: {openedOrder.address}</p>
                                         <p>التليفون: {openedOrder.phone}</p>
                                         <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                                        <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.product?.name} x ${i.quantity}`).join(' - ')}</p>
-                                        <div className='d-flex gap-2'>
+
+                                        {/* ===== نفس الجدول اللي ثبتنا عليه ===== */}
+                                        <div dir="rtl" style={{ background: '#f2f2f2', borderRadius: '12px', overflow: 'hidden', width: '100%', marginTop: '10px' }}>
+                                          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', tableLayout: 'fixed' }}>
+                                            <thead>
+                                              <tr style={{ background: '#eee', fontWeight: 'bold' }}>
+                                                <th style={{ padding: '8px 4px', borderLeft: '1px solid #ddd', width: '50%', wordBreak: 'break-word' }}>المنتج</th>
+                                                <th style={{ padding: '8px 4px', borderLeft: '1px solid #ddd', width: '25%' }}>الكمية</th>
+                                                <th style={{ padding: '8px 4px', width: '25%' }}>المجموع</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {openedOrder.orderItems?.map((item, index) => {
+                                                const name = item.name || item.product?.name
+                                                const size = item.size ? ` (${item.size})` : ''
+                                                const total = item.price * item.quantity
+                                                return (
+                                                  <tr key={index} style={{ borderTop: '1px solid #ddd' }}>
+                                                    <td style={{ padding: '8px 4px', fontWeight: 'bold', wordBreak: 'break-word' }}>{name}{size}</td>
+                                                    <td style={{ padding: '8px 4px' }}>
+                                                      <span dir="ltr" style={{ background: '#d9d9d9', padding: '3px 12px', borderRadius: '20px', display: 'inline-block', fontWeight: 'bold' }}>
+                                                        x {item.quantity}
+                                                      </span>
+                                                    </td>
+                                                    <td dir="ltr" style={{ padding: '8px 4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{total} ج</td>
+                                                  </tr>
+                                                )
+                                              })}
+                                            </tbody>
+                                          </table>
+                                        </div>
+
+                                        {/* الإجمالي */}
+                                        <div className="mt-3" dir="rtl">
+                                          <div className="d-flex justify-content-between py-1">
+                                            <span>المجموع الفرعي</span>
+                                            <span dir="ltr">{openedOrder.totalOrder} ج</span>
+                                          </div>
+                                          <div className="d-flex justify-content-between py-1 border-top">
+                                            <span style={{ fontWeight: 'bold', fontSize: '18px' }}>الإجمالي</span>
+                                            <span dir="ltr" style={{ fontWeight: 'bold', fontSize: '18px', color: '#ff6a00' }}>{openedOrder.totalOrder} ج</span>
+                                          </div>
+                                        </div>
+
+                                        <div className='d-flex gap-2 mt-3'>
                                             <button onClick={() => setOpenedOrder(null)} className='btn btn-secondary flex-fill'>خروج من الطلب</button>
                                         </div>
                                     </div>
