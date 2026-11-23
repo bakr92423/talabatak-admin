@@ -136,9 +136,51 @@ const OrdersPage = () => {
                     <p>العنوان: {openedOrder.address}</p>
                     <p>التليفون: {openedOrder.phone}</p>
                     <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
-                    {/* اتصلحت: نعرض الاسم المحفوظ في الأوردر + الحجم */}
-                    <p>الأصناف: {openedOrder.orderItems?.map(i => `${i.name || i.product?.name}${i.size ? ` (${i.size})` : ''} x ${i.quantity} - ${i.price}ج`).join(' | ')}</p>
-                    <div className='d-flex gap-2'>
+
+                    {/* ===== جدول الأصناف بنفس شكل الصورة بالظبط ===== */}
+                    <div className="mt-3" dir="rtl" style={{ background: '#f2f2f2', borderRadius: '16px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center' }}>
+                        <thead>
+                          <tr style={{ background: '#eee', fontWeight: 'bold' }}>
+                            <th style={{ padding: '12px', borderLeft: '1px solid #ddd' }}>المنتج</th>
+                            <th style={{ padding: '12px', borderLeft: '1px solid #ddd' }}>الكمية</th>
+                            <th style={{ padding: '12px' }}>المجموع</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {openedOrder.orderItems?.map((i, idx) => {
+                            const name = i.name || i.product?.name
+                            const size = i.size ? ` (${i.size})` : ''
+                            const total = i.price * i.quantity
+                            return (
+                              <tr key={idx} style={{ borderTop: '1px solid #ddd' }}>
+                                <td style={{ padding: '12px', fontWeight: 'bold' }}>{name}{size}</td>
+                                <td style={{ padding: '12px' }}>
+                                  <span dir="ltr" style={{ background: '#d9d9d9', padding: '4px 14px', borderRadius: '20px', display: 'inline-block', fontWeight: 'bold' }}>
+                                    x {i.quantity}
+                                  </span>
+                                </td>
+                                <td dir="ltr" style={{ padding: '12px', fontWeight: 'bold' }}>{total} ج</td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* المجموع الفرعي / الإجمالي */}
+                    <div className="mt-3" dir="rtl">
+                      <div className="d-flex justify-content-between py-1">
+                        <span>المجموع الفرعي</span>
+                        <span dir="ltr">{openedOrder.totalOrder} ج</span>
+                      </div>
+                      <div className="d-flex justify-content-between py-1 border-top">
+                        <span style={{ fontWeight: 'bold', fontSize: '18px' }}>الإجمالي</span>
+                        <span dir="ltr" style={{ fontWeight: 'bold', fontSize: '18px', color: '#ff6a00' }}>{openedOrder.totalOrder} ج</span>
+                      </div>
+                    </div>
+
+                    <div className='d-flex gap-2 mt-3'>
                       <button onClick={() => setOpenedOrder(null)} className='btn btn-secondary flex-fill'>خروج من الطلب</button>
                     </div>
                   </div>

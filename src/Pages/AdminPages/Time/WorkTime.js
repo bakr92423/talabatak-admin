@@ -99,7 +99,7 @@ const WorkTime = () => {
                              <input type='time' className='col-8 mx-1 ' value={closingTime} onChange={(e)=>setClosingTime(e.target.value)}   />  </div> 
                             <div className='col-11 col-md-6 my-2 col-lg-4 d-flex' > <label className='fw-bold' >حالة المتجر</label> 
                               <select className='col-8 mx-1 ' value={isOpen} onChange={(e)=>setIsOpen(e.target.value)}  >
-                                <option value={true} >مفنوح</option>
+                                <option value={true} >مفوح</option>
                                 <option value={false} >مغلق</option>
                               </select>
                             </div> 
