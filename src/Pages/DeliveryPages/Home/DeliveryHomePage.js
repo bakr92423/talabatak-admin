@@ -35,6 +35,30 @@ const OrderItemsTable = ({ items }) => (
   </div>
 )
 
+// ===== من كام دقيقة =====
+const timeAgo = (date) => {
+  if (!date) return ''
+  const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
+  if (diff < 0) return 'الآن'
+  if (diff < 60) return 'الآن'
+  if (diff < 3600) {
+    const m = Math.floor(diff / 60)
+    return `منذ ${m} دقيقة`
+  }
+  if (diff < 86400) {
+    const h = Math.floor(diff / 3600)
+    const m = Math.floor((diff % 3600) / 60)
+    return `منذ ${h} ساعة${m ? ` و ${m} دقيقة` : ''}`
+  }
+  const d = Math.floor(diff / 86400)
+  return `منذ ${d} يوم`
+}
+
+// ===== اسم العميل =====
+const getCustomerName = (o) => {
+  return o?.customerName || o?.user?.name || o?.name || o?.clientName || 'عميل'
+}
+
 const DeliveryHomePage = () => {
   const [orders, setOrders] = useState([])
   const [openedOrder, setOpenedOrder] = useState(null)
@@ -44,8 +68,8 @@ const DeliveryHomePage = () => {
   const audioRef = useRef(null)
   const soundOnRef = useRef(false)
   const URL = 'https://talabatak-ebon.vercel.app'
-    const user=JSON.parse(sessionStorage.getItem("user"))
-     const name=user.name
+  const user = JSON.parse(sessionStorage.getItem("user"))
+  const name = user.name
 
   const getPilotId = () => {
     try {
@@ -95,7 +119,7 @@ const DeliveryHomePage = () => {
     try {
       const res = await axios.get(`${URL}/api/order`)
       const list = res.data.data || res.data.orders || res.data || []
-      console.log(list,"list");
+      console.log(list, "list");
       const arr = Array.isArray(list) ? list : []
       const pending = arr.filter(o =>
         o.status === 'pending' &&
@@ -163,9 +187,10 @@ const DeliveryHomePage = () => {
       getOrders()
     } catch (e) { console.log(e); alert('حصل مشكلة في الاستلام') }
   }
+
   const cancelledOrder = async () => {
     try {
-      await axios.patch(`${URL}/api/order/${openedOrder._id}/status`, { pilotId,status:"cancelled" })
+      await axios.patch(`${URL}/api/order/${openedOrder._id}/status`, { pilotId, status: "cancelled" })
       alert('تم الغاء الأوردر  ✅')
       setOpenedOrder(null)
       getOrders()
@@ -204,6 +229,15 @@ const DeliveryHomePage = () => {
                 <div className='card delivery-card p-3 h-100'>
                   <div className='d-flex justify-content-between'><span className='badge-new'>جديد</span><span><i className='fa-solid fa-store ' ></i></span></div>
                   <h5>{o.store?.name || 'مطعم'}</h5>
+
+                  {/* ===== الاسم ومن كام دقيقة ===== */}
+                  <p className='mb-1 fw-bold'>
+                    <i className='fa-solid fa-user ms-1'></i> {getCustomerName(o)}
+                  </p>
+                  <p className='mb-2 text-muted small'>
+                    <i className='fa-solid fa-clock ms-1'></i> {timeAgo(o.createdAt)}
+                  </p>
+
                   <p><i className='fa-solid fa-location-pin ' ></i> {o.address}</p>
                   <p><i className='fa-solid fa-phone ' ></i> {o.phone}</p>
                   {/* ===== اتظبط: جدول بدل النص المقلوب ===== */}
@@ -218,11 +252,13 @@ const DeliveryHomePage = () => {
           <div className='row justify-content-center mt-3'>
             <div className='col-12 col-md-8 col-lg-6'>
               <div className='card delivery-card p-4'>
-                <div className='d-flex  justify-content-between ' >
+                <div className='d-flex justify-content-between'>
                   <h4>تفاصيل الطلب - {openedOrder.totalOrder} ج</h4>
-                    <a href={`tel:${openedOrder.phone}`} className=' phone d-flex justify-content-center align-items-center ' ><i className='fa-solid fa-phone text-light fw-bold '></i></a>
-                  </div>
+                  <a href={`tel:${openedOrder.phone}`} className=' phone d-flex justify-content-center align-items-center '><i className='fa-solid fa-phone text-light fw-bold '></i></a>
+                </div>
                 <p>العنوان: {openedOrder.address}</p>
+                <p>العميل: {getCustomerName(openedOrder)}</p>
+                <p>وقت الطلب: {timeAgo(openedOrder.createdAt)}</p>
                 <p>التليفون: {openedOrder.phone}</p>
                 <p>المطعم: {openedOrder.store?.name || 'مطعم'}</p>
                 {/* ===== اتظبط: جدول في التفاصيل كمان ===== */}
